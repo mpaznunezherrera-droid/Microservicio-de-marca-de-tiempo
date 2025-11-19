@@ -25,24 +25,25 @@ app.get("/api/hello", function (req, res) {
 });
 
 // ********** AQUI VA TU MICROSERVICIO **********
-app.get('/api/:date?', (req, res) => {
-  let dateString = req.params.date;
+app.get("/api/timestamp/:date_string", (req, res) => {
+  let dateString = req.params.date_string;
 
-  let date;
-  
-  // Si no se proporciona fecha, usar la fecha actual
-  if (!dateString) {
-    date = new Date();
+  //A 4 digit number is a valid ISO-8601 for the beginning of that year
+  //5 digits or more must be a unix time, until we reach a year 10,000 problem
+  if (/\d{5,}/.test(dateString)) {
+    let dateInt = parseInt(dateString);
+    //Date regards numbers as unix timestamps, strings are processed differently
+    res.json({ unix: dateString, utc: new Date(dateInt).toUTCString() });
   } else {
-    // Evalúa si es un timestamp en milisegundos (todos dígitos)
-    if (/^\d+$/.test(dateString)) {
-      // Convertir a número y crear fecha
-      date = new Date(Number(dateString));
+    let dateObject = new Date(dateString);
+
+    if (dateObject.toString() === "Invalid Date") {
+      res.json({ error: "Invalid Date" });
     } else {
-      // Caso normal para string de fecha
-      date = new Date(dateString);
+      res.json({ unix: dateObject.valueOf(), utc: dateObject.toUTCString() });
     }
   }
+});
 
   // Comprobar si la fecha es inválida
   if (date.toString() === 'Invalid Date') {
