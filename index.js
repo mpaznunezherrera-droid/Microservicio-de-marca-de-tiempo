@@ -25,25 +25,32 @@ app.get("/api/hello", function (req, res) {
 });
 
 // ********** AQUI VA TU MICROSERVICIO **********
-app.get("/api/timestamp/:date_string", (req, res) => {
-  let dateString = req.params.date_string;
+app.get('/api/:date?', (req, res) => {
+  let dateString = req.params.date;
 
-  //A 4 digit number is a valid ISO-8601 for the beginning of that year
-  //5 digits or more must be a unix time, until we reach a year 10,000 problem
-  if (/\d{5,}/.test(dateString)) {
-    let dateInt = parseInt(dateString);
-    //Date regards numbers as unix timestamps, strings are processed differently
-    res.json({ unix: dateString, utc: new Date(dateInt).toUTCString() });
-  } else {
-    let dateObject = new Date(dateString);
-
-    if (dateObject.toString() === "Invalid Date") {
-      res.json({ error: "Invalid Date" });
-    } else {
-      res.json({ unix: dateObject.valueOf(), utc: dateObject.toUTCString() });
-    }
+  if (!dateString) {
+    // Sin parámetro, devolver fecha actual
+    let now = new Date();
+    return res.json({ unix: now.getTime(), utc: now.toUTCString() });
   }
+
+  // Si la cadena tiene 5 o más dígitos seguidos, es timestamp unix
+  if (/^\d{5,}$/.test(dateString)) {
+    let dateInt = parseInt(dateString);
+    let date = new Date(dateInt);
+    return res.json({ unix: dateInt, utc: date.toUTCString() });
+  }
+
+  // Caso fecha en formato string
+  let dateObj = new Date(dateString);
+
+  if (dateObj.toString() === 'Invalid Date') {
+    return res.json({ error: 'Invalid Date' });
+  }
+
+  return res.json({ unix: dateObj.getTime(), utc: dateObj.toUTCString() });
 });
+
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
