@@ -27,24 +27,30 @@ app.get("/api/hello", function (req, res) {
 // ********** AQUI VA TU MICROSERVICIO **********
 app.get('/api/:date?', (req, res) => {
   let dateString = req.params.date;
-  let date;
 
+  let date;
+  
+  // Si no se proporciona fecha, usar la fecha actual
   if (!dateString) {
-    // Sin parámetro, fecha actual
     date = new Date();
-  } else if (/^\d+$/.test(dateString)) {
-    // Solo números: interpretar como timestamp en milisegundos
-    date = new Date(parseInt(dateString));
   } else {
-    // Caso fecha como string
-    date = new Date(dateString);
+    // Evalúa si es un timestamp en milisegundos (todos dígitos)
+    if (/^\d+$/.test(dateString)) {
+      // Convertir a número y crear fecha
+      date = new Date(Number(dateString));
+    } else {
+      // Caso normal para string de fecha
+      date = new Date(dateString);
+    }
   }
 
+  // Comprobar si la fecha es inválida
   if (date.toString() === 'Invalid Date') {
     return res.json({ error: 'Invalid Date' });
   }
-
-  return res.json({
+  
+  // Devolver JSON con formatos solicitados
+  res.json({
     unix: date.getTime(),
     utc: date.toUTCString()
   });
