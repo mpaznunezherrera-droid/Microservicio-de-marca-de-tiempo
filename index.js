@@ -45,18 +45,6 @@ app.get("/api/timestamp/:date_string", (req, res) => {
   }
 });
 
-  // Comprobar si la fecha es inválida
-  if (date.toString() === 'Invalid Date') {
-    return res.json({ error: 'Invalid Date' });
-  }
-  
-  // Devolver JSON con formatos solicitados
-  res.json({
-    unix: date.getTime(),
-    utc: date.toUTCString()
-  });
-});
-
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
